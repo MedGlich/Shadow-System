@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d19">
+<title>SHADOW SYSTEM</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d19;color:#edf5ff;font-family:Tahoma,Arial,sans-serif}
+header{padding:28px 20px;background:linear-gradient(140deg,#17365e,#090e1b)}
+h1{color:#80c7ff;letter-spacing:2px;font-size:25px;margin:0}
+.sub{color:#91a9ca;font-size:11px;margin-top:8px}
+main{max-width:650px;margin:auto;padding:16px 15px 100px}
+.panel{background:#111c30;border:1px solid #243955;border-radius:16px;padding:17px;margin-bottom:14px}
+h2{font-size:16px;color:#8fcaff}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.label{font-size:12px;color:#9db4d3}
+.big{font-size:32px;color:#82caff;font-weight:bold}
+.bar{height:9px;background:#263750;border-radius:20px;overflow:hidden;margin:10px 0}
+.fill{height:100%;background:linear-gradient(90deg,#347eff,#b36cff);width:0}
+button{background:#172e4d;border:1px solid #31547b;color:white;padding:11px 14px;border-radius:10px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.4}
+.quest{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #263750}
+.quest:last-child{border:0}
+.quest input{width:20px;height:20px;accent-color:#55aaff}
+small,.muted{color:#91a9ca;font-size:12px}
+.quest small{display:block;margin-top:5px}
+.section{display:none}
+.section.active{display:block}
+.stat{margin:13px 0}
+.statline{display:flex;justify-content:space-between;font-size:13px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#101a2b;border-top:1px solid #263955;display:flex;justify-content:space-around;padding:12px 3px calc(12px + env(safe-area-inset-bottom))}
+nav button{background:none;border:0;color:#9ab4d6;font-size:11px}
+nav button.active{color:#75bdff}
+.notice{font-size:12px;color:#8fcaff;line-height:2}
+</style>
+</head>
+<body>
+<header>
+ <div class="sub">سیستم اختصاصی توسعه شخصیت</div>
+ <h1>⚔️ SHADOW SYSTEM</h1>
+ <div class="sub">زمان بیداری تو فرا رسیده است...</div>
+</header>
+
+<main>
+<section id="home" class="section active">
+ <div class="panel">
+  <div class="row">
+   <div><div class="label">سطح بازیکن</div><div class="big" id="level">01</div></div>
+   <div style="text-align:left"><div class="label">رتبه شکارچی</div><div class="big" id="rank">E</div></div>
+  </div>
+  <div class="row"><span class="muted">امتیاز تجربه</span><b id="xp">0 XP</b></div>
+  <div class="bar"><div class="fill" id="xpbar"></div></div>
+  <small id="next"></small>
+ </div>
+
+ <div class="panel">
+  <h2>📜 مأموریت‌های روزانه</h2>
+  <div id="quests"></div>
+  <div class="row" style="margin-top:15px">
+   <span class="muted" id="daily"></span>
+   <button onclick="resetQuests()">روز جدید</button>
+  </div>
+ </div>
+
+ <div class="panel">
+  <h2>🌑 مأموریت مخفی</h2>
+  <p>امروز کاری انجام بده که تو را از منطقه امن خودت خارج کند.</p>
+  <button id="hidden" onclick="completeHidden()">تکمیل مأموریت +۳۰ XP</button>
+ </div>
+
+ <div class="panel">
+  <h2>🐉 سیاه‌چال هفتگی</h2>
+  <p>یک چالش واقعی و مفید برای این هفته انتخاب کن.</p>
+  <button id="dungeon" onclick="completeDungeon()">شکست سیاه‌چال +۵۰ XP</button>
+ </div>
+</section>
+
+<section id="stats" class="section">
+ <div class="panel">
+  <h2>◈ ویژگی‌های بازیکن</h2>
+  <div id="attributes"></div>
+  <p class="muted">این اعداد امتیازهای بازی هستند و معیار علمی توانایی انسان نیستند.</p>
+ </div>
+</section>
+
+<section id="history" class="section">
+ <div class="panel">
+  <h2>📖 تاریخچه پیشرفت</h2>
+  <div id="log"></div>
+ </div>
+</section>
+
+<section id="settings" class="section">
+ <div class="panel">
+  <h2>⚙️ تنظیمات سیستم</h2>
+  <p class="notice">اطلاعات تو روی همین گوشی ذخیره می‌شود.</p>
+  <button onclick="exportData()">پشتیبان‌گیری از اطلاعات</button>
+  <button onclick="document.getElementById('file').click()">بازیابی اطلاعات</button>
+  <input id="file" type="file" accept="application/json" hidden onchange="importData(event)">
+  <p class="muted">پیشنهاد: هر هفته یک نسخه پشتیبان بگیر.</p>
+  <button onclick="if(confirm('تمام اطلاعات پاک شود؟')){localStorage.removeItem('shadowSave');location.reload()}">پاک کردن اطلاعات بازیکن</button>
+ </div>
+</section>
+</main>
+
+<nav>
+ <button class="active" onclick="tab('home',this)">⌂<br>خانه</button>
+ <button onclick="tab('stats',this)">◈<br>ویژگی‌ها</button>
+ <button onclick="tab('history',this)">▤<br>تاریخچه</button>
+ <button onclick="tab('settings',this)">⚙<br>تنظیمات</button>
+</nav>
+
+<script>
+const tasks=[
+ ["مدیتیشن","۲۰ دقیقه",20,"WIS"],
+ ["تمرین بدنی","۳۰ دقیقه",30,"STR"],
+ ["تمرین تمرکز","۱۵ دقیقه",15,"INT"],
+ ["مطالعه عمیق","۳۰ دقیقه",20,"INT"],
+ ["تمرین مهارت","۱۵ دقیقه",25,"AGI"],
+ ["خواب سالم","۷ تا ۹ ساعت خواب",15,"VIT"]
+];
+const names=["STR","INT","AGI","VIT","WIS","DISC"];
+const today=()=>new Date().toLocaleDateString("en-CA");
+const week=()=>{let d=new Date(),x=new Date(d);x.setDate(d.getDate()-((d.getDay()+6)%7));return x.toLocaleDateString("en-CA")};
+function fresh(){return {xp:0,level:1,done:[],date:today(),hidden:false,dungeon:false,week:week(),stats:Object.fromEntries(names.map(n=>[n,10])),log:[]}}
+let s;
+function save(){localStorage.setItem("shadowSave",JSON.stringify(s))}
+function load(){
+ try{s=JSON.parse(localStorage.getItem("shadowSave"))||fresh()}catch{s=fresh()}
+ if(!s.stats)s=fresh();
+ if(s.date!==today()){s.done=[];s.hidden=false;s.date=today()}
+ if(s.week!==week()){s.dungeon=false;s.week=week()}
+ save()
+}
+function award(n,label,stat){
+ s.xp+=n;
+ if(stat)s.stats[stat]++;
+ let old=s.level;
+ s.level=Math.floor(s.xp/100)+1;
+ s.log.unshift({date:new Date().toLocaleString("fa-IR"),label,xp:n});
+ if(s.log.length>100)s.log.length=100;
+ if(s.level>old)s.log.unshift({date:new Date().toLocaleString("fa-IR"),label:"افزایش سطح! Level "+s.level,xp:0});
+ save();render()
+}
+function render(){
+ document.getElementById("level").textContent=String(s.level).padStart(2,"0");
+ document.getElementById("rank").textContent=s.level>=40?"S":s.level>=25?"A":s.level>=15?"B":s.level>=8?"C":s.level>=4?"D":"E";
+ document.getElementById("xp").textContent=s.xp+" XP";
+ document.getElementById("xpbar").style.width=(s.xp%100)+"%";
+ document.getElementById("next").textContent=(100-s.xp%100)+" XP تا سطح بعدی";
+ document.getElementById("quests").innerHTML=tasks.map((t,i)=>`<label class="quest"><input type="checkbox" ${s.done.includes(i)?"checked disabled":""} onchange="finish(${i})"><span>${t[0]}<small>${t[1]} · +${t[2]} XP</small></span></label>`).join("");
+ document.getElementById("daily").textContent=s.done.length+" از ۶ مأموریت";
+ document.getElementById("hidden").disabled=s.hidden;
+ document.getElementById("dungeon").disabled=s.dungeon;
+ document.getElementById("attributes").innerHTML=names.map(n=>`<div class="stat"><div class="statline"><b>${n}</b><span>${s.stats[n]}</span></div><div class="bar"><div class="fill" style="width:${Math.min(100,s.stats[n])}%"></div></div></div>`).join("");
+ document.getElementById("log").innerHTML=s.log.length?s.log.map(x=>`<p><b>${x.label}</b><br><small>${x.date} · +${x.xp} XP</small></p>`).join(""):"<p class='muted'>ماجراجویی تو از اینجا شروع می‌شود.</p>";
+}
+function finish(i){
+ if(s.done.includes(i))return;
+ s.done.push(i);award(tasks[i][2],tasks[i][0],tasks[i][3]);
+ if(s.done.length===6)award(20,"تکمیل تمام مأموریت‌های روزانه","DISC")
+}
+function completeHidden(){if(s.hidden)return;s.hidden=true;award(30,"مأموریت مخفی","DISC")}
+function completeDungeon(){if(s.dungeon)return;s.dungeon=true;award(50,"سیاه‌چال هفتگی","VIT")}
+function resetQuests(){if(confirm("فهرست روزانه پاک شود؟ XP قبلی باقی می‌ماند.")){s.done=[];save();render()}}
+function tab(id,b){
+ document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ b.classList.add("active")
+}
+function exportData(){
+ let a=document.createElement("a"),u=URL.createObjectURL(new Blob([JSON.stringify(s,null,2)],{type:"application/json"}));
+ a.href=u;a.download="shadow-system-backup.json";a.click();URL.revokeObjectURL(u)
+}
+function importData(e){
+ let f=e.target.files[0];if(!f)return;
+ let r=new FileReader();
+ r.onload=()=>{try{
+ let x=JSON.parse(r.result);
+ if(!x.stats||!Array.isArray(x.done))throw Error();
+ s=x;save();render();alert("اطلاعات بازیابی شد")
+ }catch{alert("فایل پشتیبان معتبر نیست")}};
+ r.readAsText(f)
+}
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+load();render();
+</script>
+</body>
+</html>
