@@ -1,0 +1,20 @@
+
+{
+  "name": "SHADOW SYSTEM - سیستم بیداری",
+  "short_name": "SHADOW",
+  "lang": "fa",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080d19",
+  "theme_color": "#080d19",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
